@@ -417,4 +417,30 @@ class ComposedConfigSlurperTest extends Specification {
         cleanup:
         folder?.deleteDir()
     }
+
+
+    def 'should access node metadata' () {
+
+        given:
+        def CONFIG = '''   
+           str1 = 'hello'
+           str2 = "${str1} world"
+           closure1 = { "$str" }
+           map1 = [foo: 'hello', bar: { world }]
+           '''
+        def slurper = new ComposedConfigSlurper().setRenderClosureAsString(true)
+
+        when:
+        def result = slurper.parse(CONFIG)
+        then:
+        result.str1 == 'hello'
+        result.str2 == 'hello world'
+        result.closure1 instanceof ConfigClosurePlaceholder
+        result.closure1 == new ConfigClosurePlaceholder('{ "$str" }')
+        result.map1.foo == 'hello'
+        result.map1.bar == new ConfigClosurePlaceholder('{ world }')
+
+    }
+
+
 }

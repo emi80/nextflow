@@ -73,10 +73,10 @@ class CmdConfigTest extends Specification {
         then:
         buffer.toString() == """
                 docker.enabled=true
-                process.executor=slurm
-                process.memory=${mem.toString()}
                 process.omega=Hi' there
                 process.queue=long
+                process.memory=${mem.toString()}
+                process.executor=slurm
                 """
                 .stripIndent().leftTrim()
 
@@ -104,6 +104,11 @@ class CmdConfigTest extends Specification {
         cmd.printCanonical(config, buffer)
         then:
         buffer.toString() == '''
+                    process {
+                       executor = 'slurm'
+                       queue = 'long'
+                    }
+                    
                     docker {
                        enabled = true
                     }
@@ -115,11 +120,6 @@ class CmdConfigTest extends Specification {
                           port = 25
                           user = 'yo'
                        }
-                    }
-
-                    process {
-                       executor = 'slurm'
-                       queue = 'long'
                     }
                     '''
                     .stripIndent().leftTrim()
@@ -143,9 +143,9 @@ class CmdConfigTest extends Specification {
 
         then:
         buffer.toString() == '''
-                docker.enabled = true
                 process.executor = 'slurm'
                 process.queue = 'long'
+                docker.enabled = true
                 '''
                 .stripIndent().leftTrim()
 
