@@ -160,7 +160,7 @@ class ComposedConfigSlurper {
     }
 
     ComposedConfigSlurper setRenderClosureAsString(boolean value) {
-        this.renderClosureAsString = true
+        this.renderClosureAsString = value
         return this
     }
 

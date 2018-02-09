@@ -20,6 +20,8 @@
 
 package nextflow.cli
 
+import java.nio.file.Files
+
 import spock.lang.Specification
 /**
  *
@@ -158,7 +160,59 @@ class CmdConfigTest extends Specification {
         then:
         buffer.toString() == "foo = 'Hi\\' there'\n"
 
+    }
 
+
+    def 'should parse config file' () {
+        given:
+        def folder = Files.createTempDirectory('test')
+        def CONFIG = folder.resolve('nextflow.config')
+
+        CONFIG.text = '''
+        manifest {
+            author = 'me'
+            mainScript = 'foo.nf'
+        }
+        
+        process {
+          queue = 'cn-el7'
+          cpus = 4 
+          memory = 10.GB
+          time = 5.h
+          ext.other = { 10.GB * task.attempt }
+        }
+        '''
+        def buffer = new ByteArrayOutputStream()
+        // command definition 
+        def cmd = new CmdConfig()
+        cmd.launcher = Mock(Launcher)
+        cmd.stdout = buffer
+        cmd.args = [ CONFIG.toString() ]
+
+        when:
+        cmd.run()
+        
+        then:
+        buffer.toString() == '''
+        manifest {
+           author = 'me'
+           mainScript = 'foo.nf'
+        }
+        
+        process {
+           queue = 'cn-el7'
+           cpus = 4
+           memory = '10 GB'
+           time = '5h'
+           ext {
+              other = { 10.GB * task.attempt }
+           }
+        }
+        '''
+        .stripIndent().leftTrim()
+
+        cleanup:
+        folder.deleteDir()
     }
 
 

@@ -422,16 +422,37 @@ class ComposedConfigSlurperTest extends Specification {
     def 'should access node metadata' () {
 
         given:
+        ConfigObject result
         def CONFIG = '''   
            str1 = 'hello'
            str2 = "${str1} world"
            closure1 = { "$str" }
            map1 = [foo: 'hello', bar: { world }]
            '''
-        def slurper = new ComposedConfigSlurper().setRenderClosureAsString(true)
 
         when:
-        def result = slurper.parse(CONFIG)
+        result = new ComposedConfigSlurper()
+                .parse(CONFIG)
+        then:
+        result.str1 instanceof String
+        result.str2 instanceof GString
+        result.closure1 instanceof Closure
+        result.map1.bar instanceof Closure
+
+        when:
+        result = new ComposedConfigSlurper()
+                .setRenderClosureAsString(false)
+                .parse(CONFIG)
+        then:
+        result.str1 instanceof String
+        result.str2 instanceof GString
+        result.closure1 instanceof Closure
+        result.map1.bar instanceof Closure
+
+        when:
+        result = new ComposedConfigSlurper()
+                    .setRenderClosureAsString(true)
+                    .parse(CONFIG)
         then:
         result.str1 == 'hello'
         result.str2 == 'hello world'
