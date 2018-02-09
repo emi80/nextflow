@@ -63,7 +63,7 @@ class ConfigBuilder {
     boolean showClosures
 
     ConfigBuilder setShowClosures(boolean value) {
-        this.showAllProfiles
+        this.showClosures = value
         return this
     }
 
