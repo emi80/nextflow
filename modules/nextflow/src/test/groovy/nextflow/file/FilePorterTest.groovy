@@ -16,6 +16,8 @@
 
 package nextflow.file
 
+import nextflow.Global
+
 import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -29,12 +31,41 @@ import test.TestHelper
  */
 class FilePorterTest extends Specification {
 
+    def 'should get the download path' () {
+
+        when:
+        new Session()
+        Global.session.workDir = Paths.get('/work')
+        then:
+        FilePorter.getDownloadPath() == Global.session.workDir.resolve('download')
+
+        when:
+        new Session([filePorter: [downloadPath: '/foo/bar']])
+        then:
+        FilePorter.getDownloadPath().toString() == '/foo/bar'
+
+    }
+
+    def 'should get the core threads value' () {
+
+        when:
+        new Session()
+        then:
+        FilePorter.getCoreThreads() == Runtime.getRuntime().availableProcessors()
+
+        when:
+        new Session([filePorter: [coreThreads: 10]])
+        then:
+        FilePorter.getCoreThreads() == 10
+
+    }
+
     def 'should get the max threads value' () {
 
         when:
         new Session()
         then:
-        FilePorter.getMaxThreads() == Runtime.getRuntime().availableProcessors()
+        FilePorter.getMaxThreads() == 2 * Runtime.getRuntime().availableProcessors()
 
         when:
         new Session([filePorter: [maxThreads: 99]])
