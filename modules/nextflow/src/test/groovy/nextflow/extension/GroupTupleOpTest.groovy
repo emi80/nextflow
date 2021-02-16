@@ -141,4 +141,24 @@ class GroupTupleOpTest extends Specification {
         result.val == [k1, ['f']]
         result.val == Channel.STOP
     }
+
+    def 'should group items with different sizes' () {
+        given:
+        def tuples = [
+                ['a', 'c', 'd'],
+                ['a', 'b'],
+        ]
+
+        when:
+        def result = tuples.channel().groupTuple()
+        then:
+        result.val == ['a', ['c', 'b'], ['d']]
+        result.val == Channel.STOP
+
+        when:
+        result = tuples.reverse().channel().groupTuple()
+        then:
+        result.val == ['a', ['b', 'c'], ['d']]
+        result.val == Channel.STOP
+    }
 }
